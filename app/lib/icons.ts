@@ -2,16 +2,18 @@ const ICON_SIZE = 8;
 const ICON_COLUMNS = 4;
 
 const ICON_INDEX = {
-  number1: 0,
-  number2: 1,
-  number3: 2,
-  number4: 3,
-  number5: 4,
-  number6: 5,
-  number7: 6,
-  number8: 7,
+  one: 0,
+  two: 1,
+  three: 2,
+  four: 3,
+  five: 4,
+  six: 5,
+  seven: 6,
+  eight: 7,
   flag: 8,
   bomb: 9,
+  star: 10,
+  dice: 11,
 } as const;
 
 export type IconName = keyof typeof ICON_INDEX;

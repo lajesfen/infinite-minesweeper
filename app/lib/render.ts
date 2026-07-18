@@ -1,17 +1,8 @@
 import type { Camera } from "./camera";
 import type { GameState } from "./gameState";
+import { getIcon, IconName } from "./icons";
 
-const NUMBER_COLORS = [
-  "",
-  "#0000FF",
-  "#008000",
-  "#FF0000",
-  "#000080",
-  "#800000",
-  "#008080",
-  "#000000",
-  "#808080",
-];
+const ICON_DRAW_SIZE_RATIO = 0.75;
 
 export function drawBoard(
   ctx: CanvasRenderingContext2D,
@@ -53,7 +44,7 @@ function drawCell(
 ) {
   const cell = state.peek(x, y);
 
-  if (!cell || (!cell.revealed && !cell.flagged)) {
+  if (!cell || !cell.revealed) {
     drawUnrevealed(ctx, posX, posY, cellSize, cell?.flagged ?? false);
     return;
   }
@@ -68,21 +59,18 @@ function drawUnrevealed(
   cellSize: number,
   flagged: boolean,
 ) {
-  ctx.fillStyle = "#c6c6c6";
+  ctx.fillStyle = "#eaecef";
   ctx.fillRect(posX, posY, cellSize, cellSize);
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(posX, posY, cellSize, 3);
-  ctx.fillRect(posX, posY, 3, cellSize);
-  ctx.fillStyle = "#808080";
-  ctx.fillRect(posX + cellSize - 3, posY, 3, cellSize);
-  ctx.fillRect(posX, posY + cellSize - 3, cellSize, 3);
+  ctx.fillRect(posX, posY, cellSize, 2);
+  ctx.fillRect(posX, posY, 2, cellSize);
+  ctx.fillStyle = "#ccd0d5";
+  ctx.fillRect(posX + cellSize - 2, posY, 2, cellSize);
+  ctx.fillStyle = "#b1b7bf";
+  ctx.fillRect(posX, posY + cellSize - 2, cellSize, 2);
 
   if (flagged) {
-    ctx.fillStyle = "red";
-    ctx.font = `${cellSize * 0.6}px sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("🚩", posX + cellSize / 2, posY + cellSize / 2);
+    drawIcon(ctx, "flag", posX, posY, cellSize);
   }
 }
 
@@ -95,31 +83,72 @@ function drawRevealed(
   posY: number,
   cellSize: number,
 ) {
-  ctx.fillStyle = "#e0e0e0";
+  ctx.fillStyle = "#eaecef";
   ctx.fillRect(posX, posY, cellSize, cellSize);
-  ctx.strokeStyle = "#bdbdbd";
+  ctx.strokeStyle = "#ccd0d5";
   ctx.strokeRect(posX, posY, cellSize, cellSize);
 
   if (state.isBomb(x, y)) {
-    ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.arc(
-      posX + cellSize / 2,
-      posY + cellSize / 2,
-      cellSize * 0.25,
-      0,
-      Math.PI * 2,
-    );
-    ctx.fill();
+    drawIcon(ctx, "bomb", posX, posY, cellSize);
     return;
   }
 
   const count = state.countAdjacentBombs(x, y);
   if (count > 0) {
-    ctx.fillStyle = NUMBER_COLORS[count];
-    ctx.font = `bold ${cellSize * 0.5}px sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(String(count), posX + cellSize / 2, posY + cellSize / 2);
+    drawIcon(ctx, getNumberIconName(count), posX, posY, cellSize);
+  }
+}
+
+function drawIcon(
+  ctx: CanvasRenderingContext2D,
+  iconName: IconName,
+  posX: number,
+  posY: number,
+  cellSize: number,
+) {
+  const icon = getIcon(iconName);
+  if (!icon.image || !icon.image.complete || icon.image.naturalWidth === 0)
+    return;
+
+  const drawSize = cellSize * ICON_DRAW_SIZE_RATIO;
+  const drawX = posX + (cellSize - drawSize) / 2;
+  const drawY = posY + (cellSize - drawSize) / 2;
+
+  const previousSmoothing = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(
+    icon.image,
+    icon.sourceX,
+    icon.sourceY,
+    8,
+    8,
+    drawX,
+    drawY,
+    drawSize,
+    drawSize,
+  );
+  ctx.imageSmoothingEnabled = previousSmoothing;
+}
+
+function getNumberIconName(count: number): IconName {
+  switch (count) {
+    case 1:
+      return "one";
+    case 2:
+      return "two";
+    case 3:
+      return "three";
+    case 4:
+      return "four";
+    case 5:
+      return "five";
+    case 6:
+      return "six";
+    case 7:
+      return "seven";
+    case 8:
+      return "eight";
+    default:
+      return "one";
   }
 }

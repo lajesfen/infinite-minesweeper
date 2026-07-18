@@ -1,1 +1,1 @@
-# hi
+# Infinite Minesweeper

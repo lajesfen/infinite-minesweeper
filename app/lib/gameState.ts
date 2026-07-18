@@ -5,6 +5,12 @@ export type CellState = {
   flagged: boolean;
 };
 
+export type GameOverStats = {
+  revealedCells: number;
+  correctFlags: number;
+  incorrectFlags: number;
+};
+
 function cellKey(x: number, y: number) {
   return `${x},${y}`;
 }
@@ -91,5 +97,28 @@ export class GameState {
     const cell = this.getOrCreate(x, y);
     if (cell.revealed) return;
     cell.flagged = !cell.flagged;
+  }
+
+  getGameOverStats(): GameOverStats {
+    let revealedCells = 0;
+    let correctFlags = 0;
+    let incorrectFlags = 0;
+
+    for (const [key, cell] of this.cells) {
+      if (cell.revealed) {
+        revealedCells++;
+      }
+
+      if (!cell.flagged) continue;
+
+      const [x, y] = key.split(",").map(Number);
+      if (this.isBomb(x, y)) {
+        correctFlags++;
+      } else {
+        incorrectFlags++;
+      }
+    }
+
+    return { revealedCells, correctFlags, incorrectFlags };
   }
 }
