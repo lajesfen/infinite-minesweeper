@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     title: "Infinite Minesweeper",
     statusBarStyle: "default",
   },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
 export default function RootLayout({
