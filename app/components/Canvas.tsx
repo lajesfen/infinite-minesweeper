@@ -15,10 +15,6 @@ type Point = {
   y: number;
 };
 
-type GameOverSummary = GameOverStats & {
-  playtimeMs: number;
-};
-
 export function Canvas({ seed }: { seed: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameStateRef = useRef<GameState | null>(null);
@@ -29,8 +25,9 @@ export function Canvas({ seed }: { seed: number }) {
   const [flagPreviewPosition, setFlagPreviewPosition] = useState<Point | null>(
     null,
   );
-  const [gameOverSummary, setGameOverSummary] =
-    useState<GameOverSummary | null>(null);
+  const [gameOverStats, setGameOverSummary] = useState<GameOverStats | null>(
+    null,
+  );
   const lastPointerPositionRef = useRef<Point | null>(null);
   const dragRef = useRef({
     active: false,
@@ -62,11 +59,9 @@ export function Canvas({ seed }: { seed: number }) {
 
     const showGameOverSummary = () => {
       const startedAt = firstActionTimeRef.current ?? Date.now();
-      const stats = state.getGameOverStats();
-      setGameOverSummary({
-        ...stats,
-        playtimeMs: Date.now() - startedAt,
-      });
+      const playtime = Date.now() - startedAt;
+      const stats = state.getGameOverStats(playtime);
+      setGameOverSummary({ ...stats });
       setFlagMode(false);
       setFlagPreviewPosition(null);
     };
@@ -114,7 +109,6 @@ export function Canvas({ seed }: { seed: number }) {
     };
 
     const onPointerMove = (e: PointerEvent) => {
-      if (gameOverSummary) return;
       lastPointerPositionRef.current = { x: e.clientX, y: e.clientY };
       if (flagMode) {
         setFlagPreviewPosition({ x: e.clientX, y: e.clientY });
@@ -135,7 +129,6 @@ export function Canvas({ seed }: { seed: number }) {
     };
 
     const onPointerUp = (e: PointerEvent) => {
-      if (gameOverSummary) return;
       const drag = dragRef.current;
       if (drag.active && drag.pointerId === e.pointerId && !drag.moved) {
         const rect = canvas.getBoundingClientRect();
@@ -171,7 +164,6 @@ export function Canvas({ seed }: { seed: number }) {
     };
 
     const onPointerCancel = (e: PointerEvent) => {
-      if (gameOverSummary) return;
       const drag = dragRef.current;
       if (
         drag.pointerId === e.pointerId &&
@@ -205,34 +197,42 @@ export function Canvas({ seed }: { seed: number }) {
       window.removeEventListener("pointercancel", onPointerCancel);
       canvas.removeEventListener("contextmenu", onContextMenu);
     };
-  }, [seed, flagMode, gameOverSummary]);
+  }, [seed, flagMode, gameOverStats]);
 
   return (
     <div className="relative flex flex-col flex-1 items-center justify-center overflow-hidden">
-      {gameOverSummary ? <GameOverModal summary={gameOverSummary} /> : null}
-      <button
-        type="button"
-        onClick={() => {
-          if (gameOverSummary) return;
-          if (flagMode) return;
-          setFlagMode(true);
-          setFlagPreviewPosition(
-            lastPointerPositionRef.current ?? {
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            },
-          );
-        }}
-        aria-pressed={flagMode}
-        aria-label="Flag mode"
-        className={`absolute bottom-4 left-1/2 z-10 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full border shadow-lg transition ${
-          flagMode
-            ? "border-amber-300 bg-amber-400"
-            : "border-white/20 bg-slate-900/80"
-        }`}
-      >
-        <span style={getIconStyle("flag", 28)} />
-      </button>
+      {gameOverStats ? <GameOverModal stats={gameOverStats} /> : null}
+      <div className="absolute z-10 bottom-4 left-1/2 -translate-x-1/2 flex gap-1 items-center justify-center">
+        <button
+          type="button"
+          onClick={() => {
+            if (gameOverStats) return;
+            setFlagMode(true);
+            setFlagPreviewPosition(
+              lastPointerPositionRef.current ?? {
+                x: window.innerWidth / 2,
+                y: window.innerHeight / 2,
+              },
+            );
+          }}
+          aria-pressed={flagMode}
+          aria-label="Flag mode"
+          className="flex size-10 items-center bg-white/60 cursor-pointer justify-center rounded-lg shadow-lg border-2 border-white"
+        >
+          <span style={getIconStyle("flag", 28)} />
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            window.location.href = "/";
+          }}
+          aria-pressed={flagMode}
+          aria-label="Reset"
+          className="flex size-10 items-center bg-white/60 cursor-pointer justify-center rounded-lg shadow-lg border-2 border-white"
+        >
+          <span style={getIconStyle("dice", 28)} />
+        </button>
+      </div>
       {flagMode && flagPreviewPosition ? (
         <div
           aria-hidden="true"

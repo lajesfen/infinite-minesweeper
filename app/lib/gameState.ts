@@ -9,6 +9,7 @@ export type GameOverStats = {
   revealedCells: number;
   correctFlags: number;
   incorrectFlags: number;
+  playtime: number;
 };
 
 function cellKey(x: number, y: number) {
@@ -99,7 +100,7 @@ export class GameState {
     cell.flagged = !cell.flagged;
   }
 
-  getGameOverStats(): GameOverStats {
+  getGameOverStats(playtime: number): GameOverStats {
     let revealedCells = 0;
     let correctFlags = 0;
     let incorrectFlags = 0;
@@ -119,6 +120,6 @@ export class GameState {
       }
     }
 
-    return { revealedCells, correctFlags, incorrectFlags };
+    return { revealedCells, correctFlags, incorrectFlags, playtime };
   }
 }

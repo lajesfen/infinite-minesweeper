@@ -47,7 +47,7 @@ export function getIconStyle(name: IconName, size: number) {
   const sheetSize = size * ICON_COLUMNS;
 
   return {
-    display: "block",
+    display: "inline-block",
     width: `${size}px`,
     height: `${size}px`,
     backgroundImage: 'url("/icons.png")',
