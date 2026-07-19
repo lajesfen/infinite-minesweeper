@@ -8,7 +8,7 @@ export function GameOverModal({ stats }: { stats: GameOverStats }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="game-over-title"
-        className="w-full min-w-sm max-w-lg rounded-xl bg-white/80 border-2 border-white p-6 text-black shadow-xl"
+        className="w-full min-w-xs max-w-sm rounded-xl bg-white/80 border-2 border-white p-6 text-black shadow-xl"
       >
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>

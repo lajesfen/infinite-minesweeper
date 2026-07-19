@@ -5,6 +5,11 @@ export const metadata: Metadata = {
   title: "Infinite Minesweeper",
   description:
     "Play Minesweeper on an infinite grid with a unique seed for each game.",
+  appleWebApp: {
+    capable: true,
+    title: "Infinite Minesweeper",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({
